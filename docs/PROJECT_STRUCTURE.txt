@@ -1,0 +1,232 @@
+.
+├── .DS_Store
+├── .git
+│   ├── COMMIT_EDITMSG
+│   ├── config
+│   ├── description
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   ├── sendemail-validate.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   │       ├── heads
+│   │       │   └── main
+│   │       └── remotes
+│   │           └── origin
+│   │               ├── HEAD
+│   │               └── main
+│   ├── objects
+│   │   ├── 0d
+│   │   │   └── 44ea6c8253af92444dcc0c4a38268e804bb87d
+│   │   ├── 1c
+│   │   │   └── 1588385f14c98531d0dfe8cee88e2cfc01af11
+│   │   ├── 1d
+│   │   │   └── b97a45f15064f9310c86832267915cdd16f2a2
+│   │   ├── 25
+│   │   │   ├── 48afdb81ee34f62925cadef7f22746ec2a4582
+│   │   │   └── 7f9892a9389b19b965f5de0a96a37fd395ab82
+│   │   ├── 30
+│   │   │   └── fdead8336e4d66c87c35e4a1dc47e1558dea5e
+│   │   ├── 35
+│   │   │   └── 4ec1d251b60d4404667b1deb1d9d66f6ac7cbb
+│   │   ├── 3d
+│   │   │   └── 60a310d21106667e35bc937f9b5a84119e6e9f
+│   │   ├── 42
+│   │   │   └── 167bd819f78400e9ea76302f854a4df2e643a5
+│   │   ├── 45
+│   │   │   └── e631047d4a3a910616ad627616f9d55a353683
+│   │   ├── 4c
+│   │   │   └── 28d5678f53acc77786043b848a03e26ceb68ff
+│   │   ├── 4e
+│   │   │   └── 0a9b70442f03c46dd7a5873980731f841521ae
+│   │   ├── 50
+│   │   │   └── 47908c861bb2a00b0bab0179f893eaece27773
+│   │   ├── 51
+│   │   │   └── b79c056a6cdaea545b81cfe8091881f989babc
+│   │   ├── 57
+│   │   │   ├── d836a186b7908ec1131027c672c732cd72aaee
+│   │   │   └── f299fb5b173608a433833936280e0e449330ce
+│   │   ├── 67
+│   │   │   └── a66e9f1b7e4b4efca50691bdd09d49a5d965e6
+│   │   ├── 75
+│   │   │   └── e3a066ed716fcd81f6b9efaf75309f225de424
+│   │   ├── 78
+│   │   │   └── a0086653e284348d2cc2c114212b77b631ef78
+│   │   ├── 7b
+│   │   │   └── bc11af89ee562ee0e19645a6c96aa59608eedb
+│   │   ├── 81
+│   │   │   ├── c09e0aedb630d78205c78b0216579e16e2138e
+│   │   │   └── fb64af0d1185b9e37fd3d811749a9f2a81d18b
+│   │   ├── 89
+│   │   │   └── 2d59d5e17a3586e96b1cde20022a4a866a023f
+│   │   ├── 8b
+│   │   │   └── aef1b4abc478178b004d62031cf7fe6db6f903
+│   │   ├── 8e
+│   │   │   └── cdf6823931f1c88681d724415e515076d1b7b5
+│   │   ├── 99
+│   │   │   └── 9b9ff16c90250135181c088476ffd81f92ad55
+│   │   ├── a2
+│   │   │   └── 83f3f54152208e2306ba1b07fb48d4eb3377c3
+│   │   ├── aa
+│   │   │   └── 93711bc2ca75eb1294d4e5fd41e83695314570
+│   │   ├── ac
+│   │   │   └── 1e6fba42d3cd7c4f593d8850f5990dfaa2f03a
+│   │   ├── ad
+│   │   │   └── cc899415555a42511091824ef5bd0b7800a5f9
+│   │   ├── ae
+│   │   │   ├── dd16ad96cb05ae3896e8c4d894de2e3dc21eb1
+│   │   │   └── e4a81809a8dd9b6271fbac9454643691fa8421
+│   │   ├── bb
+│   │   │   └── c5862aa7117248af2de5e173d0560990b65c56
+│   │   ├── bc
+│   │   │   └── b0b73c70c13110b41d3fa841d877fe2494277e
+│   │   ├── ca
+│   │   │   └── 74cb7227ec1af1158067bba04640094d216d64
+│   │   ├── cc
+│   │   │   └── d6162b679bb4d363536527131a3da71acaf59e
+│   │   ├── ce
+│   │   │   └── 8bc1bb849df2970846d79ea56ab96c64d46099
+│   │   ├── d0
+│   │   │   └── f049c1fc5782de0368210b0659b6b02aecc782
+│   │   ├── d5
+│   │   │   └── 64d0bc3dd917926892c55e3706cc116d5b165e
+│   │   ├── dc
+│   │   │   └── 0dfbef9f8d19ecacd30e4efc5e227398922112
+│   │   ├── e6
+│   │   │   └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+│   │   ├── f3
+│   │   │   └── ee89691ef81840a5adc9b33b0c12761e0acf32
+│   │   ├── f4
+│   │   │   └── ac6d06d5e8d4ba2c50906ce0464246743585ac
+│   │   ├── f7
+│   │   │   └── b5284e1792b72dee89531a682f164f44d7d17f
+│   │   ├── fa
+│   │   │   └── 8c7915d7fc1f8db6247716d86adc9d5f63b457
+│   │   ├── info
+│   │   └── pack
+│   ├── ORIG_HEAD
+│   └── refs
+│       ├── heads
+│       │   └── main
+│       ├── remotes
+│       │   └── origin
+│       │       ├── HEAD
+│       │       └── main
+│       └── tags
+├── .github
+│   └── workflows
+├── .gitignore
+├── app
+│   ├── .DS_Store
+│   ├── .gitkeep
+│   ├── assets
+│   │   ├── .gitkeep
+│   │   ├── avatars
+│   │   ├── expressions
+│   │   ├── icons
+│   │   ├── sounds
+│   │   └── themes
+│   ├── bodies
+│   │   ├── .DS_Store
+│   │   ├── android
+│   │   │   └── .gitkeep
+│   │   ├── desktop
+│   │   │   └── .gitkeep
+│   │   ├── rasberry_pi
+│   │   │   └── .gitkeep
+│   │   ├── raspberry_pi
+│   │   ├── shared
+│   │   └── terminal
+│   │       └── .gitkeep
+│   ├── brain
+│   │   ├── .gitkeep
+│   │   ├── context
+│   │   ├── interface
+│   │   ├── manager
+│   │   ├── models
+│   │   ├── prompts
+│   │   └── providers
+│   ├── capabilities
+│   │   ├── .gitkeep
+│   │   ├── automation
+│   │   ├── files
+│   │   ├── linux
+│   │   ├── networking
+│   │   ├── plugins
+│   │   └── search
+│   ├── config
+│   ├── linux
+│   │   └── .gitkeep
+│   ├── memory
+│   │   ├── .gitkeep
+│   │   ├── conversations
+│   │   ├── database
+│   │   ├── long_term
+│   │   ├── profile
+│   │   └── short_term
+│   ├── personality
+│   │   ├── .gitkeep
+│   │   ├── behaviors
+│   │   ├── dialogue
+│   │   ├── emotions
+│   │   └── identity
+│   ├── services
+│   ├── ui
+│   │   ├── .gitkeep
+│   │   ├── animations
+│   │   ├── components
+│   │   ├── overlays
+│   │   ├── widgets
+│   │   └── windows
+│   ├── utils
+│   │   └── .gitkeep
+│   └── voice
+│       ├── .gitkeep
+│       ├── audio
+│       ├── stt
+│       └── tts
+├── data
+│   ├── .gitkeep
+│   ├── cache
+│   ├── logs
+│   ├── models
+│   └── user
+├── docs
+│   ├── .gitkeep
+│   ├── API.md
+│   ├── ARCHITECTURE.md
+│   ├── CONTRIBUTING.md
+│   ├── LIFECYCLE.md
+│   ├── PROJECT_STRUCTURE.txt
+│   └── ROADMAP.md
+├── LICENSE
+├── main.py
+├── pyproject.toml
+├── README.md
+├── requirements.txt
+├── scripts
+└── tests
+    ├── .gitkeep
+    ├── integration
+    ├── system
+    └── unit
+
+124 directories, 106 files

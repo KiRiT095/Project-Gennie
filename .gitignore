@@ -1,18 +1,13 @@
-# macOS
 .DS_Store
-
-# Python
 __pycache__/
 *.py[cod]
-
-# Virtual Environment
+*.egg-info/
 .venv/
-
-# VS Code
-.vscode/
-
-# JetBrains
+venv/
+.env
+.pytest_cache/
+.coverage
+dist/
+build/
 .idea/
-
-# Logs
-*.log
+.vscode/

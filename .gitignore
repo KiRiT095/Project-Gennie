@@ -11,3 +11,27 @@ dist/
 build/
 .idea/
 .vscode/
+# Add these entries to the existing .gitignore if they are not already present.
+# Do not replace your existing .gitignore with this fragment.
+
+# Local model files (review model redistribution/licensing before publishing)
+models/
+
+# Local voice data
+voice_data/
+*.wav
+*.flac
+
+# Python and local environment
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store

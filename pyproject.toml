@@ -4,16 +4,20 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tuna-companion"
-version = "0.2.0"
+version = "0.4.0"
 description = "Tuna — a local-first desktop AI companion prototype"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "PySide6>=6.8,<7",
+    "psycopg[binary]>=3.3,<4",
 ]
 
 [project.optional-dependencies]
-dev = []
+dev = ["pytest>=8.0"]
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.setuptools.package-data]
+"app.brain" = ["prompts/*.txt"]

@@ -5,13 +5,16 @@
 - [x] Startup lifecycle
 - [x] Unit tests for core state transitions
 
-## Companion UI — v0.2
+## Companion UI
 - [x] Compact character-first window
 - [x] Expanded conversation/history view
 - [x] Hide text input in compact mode
 - [x] State-driven pixel-art expressions
 - [x] Temporary subtitle and transcription display hooks
-- [ ] Test on the user's Mac and refine sizing/positioning
+- [x] Remove always-visible state label and instruction prompts
+- [x] Hide empty dialogue bubbles
+- [x] Add idle bob/blink and state-aware motion
+- [ ] Verify sizing, animation feel, and drag behaviour on the user's Mac
 
 ## Voice — next major milestone
 - [ ] Voice service interface and lifecycle

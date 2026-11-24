@@ -1,6 +1,6 @@
-# Tuna architecture
+# Architecture
 
-## Current desktop composition
+## Current desktop shape
 
 ```text
 main.py
@@ -9,27 +9,27 @@ main.py
        ├── Lifecycle
        │    └── StateMachine
        └── MainWindow
-            ├── AvatarWidget (state -> expression)
-            ├── subtitle/transcription displays
-            └── expanded conversation history + text input
+            ├── AvatarWidget
+            │    └── expression PNG assets + timer-driven motion
+            ├── temporary transcript/caption labels
+            └── expanded-only history and text input
 ```
+
+`StateMachine` is framework-independent. It validates behavioural state transitions. `Lifecycle` coordinates startup. `DesktopBody` composes the desktop application. `MainWindow` decides what is visible and collects text input. `AvatarWidget` translates the current state into a visual expression and subtle motion.
+
+## Compact and expanded presentation
+
+Compact mode contains only Tuna's character, except when a temporary speech transcript or assistant subtitle has content. There is no permanent state label or instruction prompt. Clicking the character opens the conversation view. Expanded mode shows the header, conversation history, text input, and the same character at the top. Escape or the Compact control returns to compact mode.
+
+## Animation approach
+
+The avatar uses the expression PNGs as sprite frames. A small Qt timer triggers repainting at about 30 frames per second. The paint method computes a subtle pose from elapsed time: idle floating, listening pulse, thinking tilt, and a speaking open/closed-mouth cycle. Idle blinking temporarily displays the blink sprite. This is code-driven animation; there is no video or animated GIF playback.
 
 ## Boundaries
 
-- `app/core` is framework-independent and owns state/lifecycle rules.
-- `app/ui` contains reusable presentation components, including the avatar.
-- `app/bodies/desktop` owns the Qt desktop application and window behaviour.
-- The UI reads the shared StateMachine; it does not maintain a second state value.
-- A future `voice` package should provide speech-to-text, text-to-speech and wake-word services behind separate interfaces. The UI should receive events/transcripts and must not own microphone capture internals.
-- A future `brain` provider should be replaceable and must not be allowed arbitrary shell execution. Device capabilities must be explicitly allowlisted and permission-controlled.
-
-## Window modes
-
-- **Compact:** character, state, and temporary caption/transcription only. No chat input or history is visible.
-- **Expanded:** avatar and state remain at the top; conversation history and text input appear below.
-
-Clicking the compact window expands it. `Compact` or Escape returns to compact mode. The window is frameless and stays above normal windows; in expanded mode its top header can be dragged. Right-click opens a small context menu.
-
-## Voice UI hooks
-
-`MainWindow.show_user_transcription(text)` displays a user's recognised speech. `MainWindow.show_assistant_subtitle(text)` displays an assistant subtitle. These are presentation hooks only; neither performs audio capture, transcription or speech synthesis.
+- Core must not import PySide6.
+- UI must not own a duplicate state value.
+- The state label is intentionally not shown; the avatar expresses state.
+- Speech/transcription methods are display hooks, not audio capture or speech recognition.
+- Wake-word listening must be opt-in and should include microphone permission, visible listening state, mute/disable controls, and local processing.
+- Future command execution must use explicit allowlisted capabilities and permission checks, never arbitrary model-generated shell commands.

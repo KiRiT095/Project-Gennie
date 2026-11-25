@@ -24,8 +24,8 @@ class OllamaProvider(ChatProvider):
         base_url: str | None = None,
         timeout: float = 300.0,
     ) -> None:
-        self.model = model or os.getenv("TUNA_MODEL", "qwen3:4b")
-        self.base_url = (base_url or os.getenv("TUNA_OLLAMA_URL", "http://127.0.0.1:11434")).rstrip("/")
+        self.model = model or os.getenv("GENNIE_MODEL") or os.getenv("TUNA_MODEL", "qwen3:4b-instruct-2507-q4_K_M")
+        self.base_url = (base_url or os.getenv("GENNIE_OLLAMA_URL") or os.getenv("TUNA_OLLAMA_URL", "http://127.0.0.1:11434")).rstrip("/")
         self.timeout = timeout
         # A single local inference at a time is gentler on low-memory devices.
         self._request_lock = threading.Lock()
@@ -45,9 +45,9 @@ class OllamaProvider(ChatProvider):
             "think": False,
             "keep_alive": "10m",
             "options": {
-                "temperature": 0.7,
+                "temperature": 0.58,
                 "num_ctx": 4096,
-                "num_predict": 320,
+                "num_predict": 240,
             },
         }
         if response_format is not None:
@@ -71,7 +71,7 @@ class OllamaProvider(ChatProvider):
             raise ProviderError(f"Ollama returned HTTP {exc.code}.") from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             raise ProviderError(
-                "Tuna cannot reach Ollama. Make sure Ollama is running and the model is installed."
+                "Gennie cannot reach Ollama. Make sure Ollama is running and the model is installed."
             ) from exc
         except (json.JSONDecodeError, UnicodeDecodeError, KeyError, TypeError) as exc:
             raise ProviderError("Ollama returned an invalid response.") from exc

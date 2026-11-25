@@ -1,0 +1,55 @@
+{
+  "character": "Original blue-skinned female genie with oversized expressive pixel-art eyes, long indigo hair, gold jewelry and a lavender-blue smoke tail.",
+  "source": "Original 16-frame pixel-art animation with enlarged eye detail and expressive facial frames.",
+  "frame_size": [
+    315,
+    311
+  ],
+  "frame_count": 16,
+  "grid": [
+    4,
+    4
+  ],
+  "fps": 7,
+  "frames": {
+    "00": "frames/frame_00.png",
+    "01": "frames/frame_01.png",
+    "02": "frames/frame_02.png",
+    "03": "frames/frame_03.png",
+    "04": "frames/frame_04.png",
+    "05": "frames/frame_05.png",
+    "06": "frames/frame_06.png",
+    "07": "frames/frame_07.png",
+    "08": "frames/frame_08.png",
+    "09": "frames/frame_09.png",
+    "10": "frames/frame_10.png",
+    "11": "frames/frame_11.png",
+    "12": "frames/frame_12.png",
+    "13": "frames/frame_13.png",
+    "14": "frames/frame_14.png",
+    "15": "frames/frame_15.png"
+  },
+  "expressions": {
+    "neutral": 0,
+    "blink": 1,
+    "wink": 2,
+    "laughing": 3,
+    "listening": 4,
+    "happy": 5,
+    "surprised": 6,
+    "thinking": 9,
+    "explaining": 10,
+    "playful": 11,
+    "summoning": 13,
+    "confident": 15
+  },
+  "states": {
+    "SLEEPING": "lamp_idle.png",
+    "EMERGING": "frames/frame_13.png",
+    "IDLE": "frames/frame_00.png",
+    "LISTENING": "expressions/listening.png",
+    "THINKING": "expressions/thinking.png",
+    "SPEAKING": "frames/frame_10.png",
+    "RETURNING": "frames/frame_14.png"
+  }
+}

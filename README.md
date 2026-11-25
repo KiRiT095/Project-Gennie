@@ -1,197 +1,126 @@
-# Tuna
+# Project Gennie
 
-**A persistent, local-first AI companion.**
+A local-first desktop AI companion with a lamp-to-genie presence, expressive pixel-art character, and optional two-way voice chat.
 
-Tuna is an experimental desktop AI companion designed to feel less like a disposable chatbot and more like a consistent digital presence. The long-term goal is for Tuna to keep the same identity across devices while each device runs its own local AI runtime.
+## What this build does
 
-> **Current release:** `v1.0.0-beta.1`  
-> **Status:** Early beta — active development
+- A compact lamp/character presence that expands into a rounded, dark, iOS-inspired conversation window.
+- Updated 16-frame Gennie pixel-art animation with larger, more expressive eyes.
+- Local Sherpa-ONNX wake-word detection for **“Gennie”**.
+- After a wake-word match, the wake listener closes its microphone stream before the speech recognizer opens the device.
+- Local Whisper Small English speech recognition (`whisper.cpp`, quantised model) with automatic silence detection and local transcription.
+- A microphone button for manual voice input; silence ends each utterance automatically, and a second press can finish early.
+- Local macOS speech output. The voice selector prefers Ava when installed, then Samantha and other available English voices. The selected voice and speaking rate can be configured.
+- Existing Ollama chat, PostgreSQL conversation history and long-term memory are retained.
+- No cloud speech service is used by the included voice path.
 
-## What Tuna is
+## Voice flow
 
-Tuna is built around three ideas:
+1. While Gennie is resting in the lamp, the wake-word listener processes microphone audio locally.
+2. When it detects “Gennie” (the keyword list includes phonetic spelling aliases), the wake thread exits and releases the microphone.
+3. The genie emerges into a small voice HUD. The recognizer records one utterance and detects the end from silence.
+4. Whisper Small transcribes the recording locally; the transcript appears in a compact user bubble and is sent to the local Ollama brain.
+5. Gennie displays a floating reply subtitle and speaks using the selected macOS system voice.
+6. After speaking, Gennie automatically listens for the next prompt. If no one speaks before the listening timeout, she returns to the lamp and rearms the wake listener.
 
-- **Persistent identity:** Tuna's personality and interaction style should remain consistent across models and devices.
-- **Local-first operation:** The desktop build uses a locally running language model and a local PostgreSQL database.
-- **A character-first interface:** Tuna has a compact animated desktop presence, with a larger conversation view when needed.
-
-Tuna is a personal project and an evolving experiment. Features described as planned or experimental are not guaranteed to be production-ready.
-
-## Current features
-
-### Desktop companion
-
-- PySide6 desktop application.
-- Compact floating window with an animated pixel-art fish avatar.
-- Expanded conversation view.
-- Avatar expressions and animation states, including idle, listening, thinking, speaking, sleeping, confused and happy.
-- Conversation input and visible response history.
-
-### Local AI
-
-- Ollama provider integration.
-- Configurable local model.
-- Current tested model: `qwen3:4b-instruct-2507-q4_K_M`.
-- System personality prompt stored separately from application logic.
-- Background chat worker so model requests do not block the UI.
-
-### Persistent data and memory
-
-- PostgreSQL-backed conversations, messages and memories.
-- Conversation restoration from the database.
-- Memory extraction and retrieval components.
-- Local database credentials configured through environment variables.
-
-### Voice — experimental
-
-The first voice-recognition work is underway:
-
-- `sherpa-onnx` speaker embedding model installed and loaded successfully.
-- The selected Titanet model returns 192-dimensional speaker embeddings.
-- `sounddevice` microphone capture tested at 16 kHz on the MacBook Air microphone.
-- Voice enrollment and speaker verification are the next development steps.
-
-**Important:** Voice speaker recognition is probabilistic. It is not secure authentication and must not be used as the sole protection for sensitive actions.
-
-## Architecture at a glance
-
-```text
-PySide6 desktop interface
-        |
-        +---- Animated avatar and UI state
-        |
-        +---- Chat worker
-                  |
-                  v
-              TunaBrain
-                  |
-                  v
-             Ollama provider
-                  |
-                  v
-             Local Ollama model
-
-TunaBrain / memory components
-        |
-        v
-  PostgreSQL database
-
-Experimental voice pipeline
-        |
-        +---- Microphone capture
-        +---- Speaker embeddings
-        +---- Speaker verification (in progress)
-        +---- Speech recognition (planned)
-        +---- Text-to-speech (planned)
-```
-
-Each device is intended to run its own local AI runtime and personality configuration. The long-term cross-device design shares **memory**, not the model runtime or local tools. Secure memory synchronisation is a future feature, not part of this beta.
+Click the microphone button to start a voice turn manually. Silence ends the utterance; the button can also stop capture early. Voice conversations stay in a compact HUD with separate user and Gennie bubbles rather than opening the full chat history.
 
 ## Requirements
 
-The current development setup is:
+- macOS for the built-in `say` speech output.
+- Python 3.11 or newer.
+- Ollama and the configured local model for AI replies.
+- PostgreSQL for persistent history and memory (text chat can remain usable if PostgreSQL is offline).
+- Sherpa-ONNX for wake-word detection; whisper.cpp, sounddevice and NumPy for local speech recognition.
 
-- macOS on Apple Silicon (tested on an M1 MacBook Air with 8 GB RAM).
-- Python 3.14.
-- Ollama.
-- PostgreSQL 18.
-- A local Ollama model.
-- Microphone access for experimental voice work.
+## Install / update
 
-Other operating systems and hardware have not been validated.
-
-## Development setup
-
-The commands below are a starting point for the current macOS development setup. Check the repository's `pyproject.toml` and `requirements.txt` for the authoritative dependency list.
+Keep your existing `.env`, `.git`, `models/`, and local voice enrollment data. Do not overwrite credentials or database configuration with `.env.example`.
 
 ```bash
-git clone https://github.com/KiRiT095/Project-Tuna.git
-cd Project-Tuna
-
-python3 -m venv .venv
-source .venv/bin/activate
-
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+source ~/.venv/bin/activate
+python -m pip install -e '.[voice,dev]'
 ```
 
-If the project uses editable installation through `pyproject.toml`, install it with:
+Install the local Whisper.cpp runtime and **Whisper Small English Q5_1** model once:
 
 ```bash
-pip install -e .
+bash scripts/setup_voice.sh
 ```
 
-### Configure environment
+The quantised model is approximately 190 MB and is downloaded into `models/stt/`, which is ignored by Git. Whisper runs locally on the Mac; the wake-word detector remains Sherpa-ONNX and is not replaced. The English-only model is intended for English speech, including English spoken with an Indian accent; it is not a Hinglish model.
 
-Create a local `.env` file in the project root. Do not commit it.
+Keep your existing wake-word model and `keywords.txt` in `models/wakeword/`. The Whisper setup does not regenerate or replace them. Check the rest of the project setup with:
 
-Example structure (use your own database credentials):
+```bash
+python scripts/check_gennie_setup.py
+```
+
+The keyword setup includes `GENNIE`, `GENIE` and `JENNY` token aliases because speech recognition models may represent the same spoken name using different English spellings. A lower wake threshold can improve sensitivity but can also increase false activations; adjust it cautiously.
+
+## macOS voice
+
+Gennie uses the built-in macOS `say` speech service. The app chooses an installed English voice, preferring Ava, then Samantha and other available voices. To inspect the voices installed on your Mac:
+
+```bash
+python scripts/list_macos_voices.py
+```
+
+For a richer voice, open **System Settings → Accessibility → Spoken Content → System Voice → Manage Voices** and install an enhanced voice you like. Then set its exact name in `.env` with `GENNIE_TTS_VOICE`. For example:
 
 ```dotenv
-TUNA_MODEL=qwen3:4b-instruct-2507-q4_K_M
-TUNA_OLLAMA_URL=http://127.0.0.1:11434
-TUNA_DATABASE_URL=postgresql://tuna_user:YOUR_PASSWORD@localhost:5432/tuna
+GENNIE_TTS_ENABLED=true
+GENNIE_TTS_VOICE=Ava
+GENNIE_TTS_RATE=174
 ```
 
-Ensure Ollama is running and the configured model is available locally:
+Voice names vary by macOS version and installed voice packs. The app falls back to an installed English voice if the configured name is unavailable.
 
-```bash
-ollama pull qwen3:4b-instruct-2507-q4_K_M
-ollama list
+## Configuration
+
+Copy individual settings from `.env.example` only when needed. Existing `TUNA_MODEL`, `TUNA_OLLAMA_URL` and `TUNA_DATABASE_URL` variables remain supported as fallbacks.
+
+Useful voice settings:
+
+```dotenv
+GENNIE_WAKE_ENABLED=true
+GENNIE_WAKE_THRESHOLD=0.22
+GENNIE_MIC_DEVICE=
+GENNIE_WHISPER_MODEL=models/stt/ggml-small.en-q5_1.bin
+GENNIE_VOICE_MAX_SECONDS=20
+GENNIE_VOICE_END_SILENCE=1.15
+GENNIE_VOICE_START_TIMEOUT=12
+GENNIE_TTS_ENABLED=true
+GENNIE_TTS_VOICE=
+GENNIE_TTS_RATE=174
+GENNIE_IDLE_TIMEOUT_MS=45000
 ```
 
-Create the PostgreSQL role and database according to your local PostgreSQL setup. The application expects the database connection string to be supplied through the environment.
+Leave `GENNIE_MIC_DEVICE` blank to use the macOS default input device. When no index is specified, Gennie prefers a recognisable built-in MacBook microphone (rather than an iPhone Continuity microphone), then falls back to the system default. Set it to a device index only when you want to override that choice.
 
-Start Tuna using the project's entry point:
+## Launch
 
 ```bash
 python main.py
 ```
 
-If your local checkout uses a different entry point or configuration, follow the current source code and project instructions.
+Right-click the compact character for the app menu. Click the character to open the conversation. The mic button starts/stops voice input; alternatively say “Gennie” while she is resting in the lamp. Voice sessions automatically listen for your next prompt after Gennie finishes speaking. Voice mode uses a small transcript/subtitle HUD rather than opening the full conversation log.
 
-## Voice development notes
+## Privacy and limitations
 
-The experimental speaker-recognition model is expected at:
+- Wake-word detection and speech recognition run locally; the included voice pipeline does not upload audio.
+- The wake listener is active only while the app is open and Gennie is resting. It releases the mic before speech capture.
+- Whisper Small English is English-only. Recognition quality still depends on microphone quality, distance, noise and accent; it is not designed for code-switching into Hindi.
+- Wake-word detection does not verify who is speaking. The previously enrolled speaker profile is not yet used as a gate for every voice command.
+- macOS speech output uses the voices installed on the user's Mac. Voice timbre and availability therefore vary by system.
 
-```text
-models/speaker/nemo_en_titanet_small.onnx
+## Data compatibility
+
+Existing PostgreSQL tables (`tuna_conversations`, `tuna_messages`, `tuna_memories`) and legacy `TUNA_*` environment variables remain supported. No database rename, deletion or migration is performed. Keep `.env`, model weights and personal voice data out of Git.
+
+## Tests
+
+```bash
+python -m pytest -q
+python -m compileall -q app scripts
 ```
-
-The model is not necessarily included in the Git repository. Follow the project's model download instructions and check the model's licence and redistribution terms before distributing it.
-
-Voice profile data should remain outside the repository, under the user's local application-support directory. Do not commit voice recordings, embeddings, or personal voice profiles.
-
-## Security and privacy
-
-- Keep `.env` and all credentials out of version control.
-- Do not expose the PostgreSQL server directly to the public internet.
-- Do not commit database dumps, conversation databases, voice recordings or speaker profiles.
-- Treat speaker recognition as a convenience feature, not an authentication boundary.
-- Review model and dependency licences before redistributing binaries or models.
-
-## Known limitations
-
-- This is an early beta, not a production-ready application.
-- The currently validated environment is a specific Apple Silicon macOS setup.
-- Voice enrollment and reliable speaker verification are still being developed.
-- Speech-to-text, text-to-speech and wake-word support are not yet established as complete features.
-- Cross-device memory synchronisation is planned, not implemented.
-- The macOS app wrapper is not currently part of the validated setup.
-
-## Roadmap
-
-See [ROADMAP.md](ROADMAP.md) for the planned development direction and [CHANGELOG.md](CHANGELOG.md) for release history.
-
-## Contributing
-
-Tuna is evolving quickly. If you want to experiment with the project:
-
-1. Open an issue describing the problem or proposed change.
-2. Keep changes focused and avoid committing personal data or local configuration.
-3. Run the available tests before submitting a change.
-4. Document new environment variables, dependencies and setup steps.
-
-## Licence
-
-No licence is declared here. Until a licence is added to the repository, assume that the project is not licensed for redistribution or reuse beyond what applicable law permits.

@@ -1,1 +1,1 @@
-"""Reusable desktop UI components for Tuna."""
+"""Reusable desktop UI components for Project Gennie."""

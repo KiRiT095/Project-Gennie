@@ -1,1 +1,1 @@
-"""Persistence adapters for Tuna."""
+"""Persistence adapters for Project Gennie."""

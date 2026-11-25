@@ -1,8 +1,8 @@
-# Contributing to Tuna
+# Contributing to Project Gennie
 
-Thanks for your interest in Tuna.
+Thanks for your interest in Gennie.
 
-Tuna is an experimental local-first AI companion. Contributions should support its core principles: persistent identity, local-first operation, understandable architecture, privacy and reliability.
+Project Gennie is an experimental local-first AI companion. Contributions should support its core principles: persistent identity, local-first operation, understandable architecture, privacy and reliability.
 
 ## Before making changes
 

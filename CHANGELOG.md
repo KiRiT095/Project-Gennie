@@ -1,36 +1,26 @@
 # Changelog
 
-All notable changes to Tuna are documented here.
+## 1.1.1 — Live voice and minimal interface
 
-This project is currently in beta. Entries describe the development state and may include experimental functionality.
+- Reworked the desktop UI with a rounded, dark iOS-inspired appearance.
+- Replaced the earlier character frames with 16 new pixel-art frames featuring larger, more expressive eyes.
+- Added live interim transcription in the message input using local streaming Sherpa-ONNX ASR.
+- Added one-press-to-record / second-press-to-stop voice capture and automatic submission after speech endpoint detection.
+- Fixed microphone handoff: the one-shot wake listener exits and releases the microphone before ASR starts.
+- Added local macOS speech output with preferred female English voice selection and configurable rate.
+- Tightened Gennie's system prompt, removed emoji from generated replies, and reduced default generation length/temperature.
+- Prevented pytest from collecting the manual wake-word diagnostic script.
 
-## [1.0.0-beta.1] - 2026-11-25
+## 1.0.0-beta.2 — Project Gennie rebrand
 
-### Added
-- Re-established the project foundation while preserving the existing Git repository and history.
-- PySide6 desktop companion interface with compact and expanded views.
-- Animated pixel-art avatar with multiple expressions and UI state-driven animation.
-- Local Ollama provider integration.
-- Configurable model selection through environment configuration.
-- PostgreSQL persistence for conversations, messages and memories.
-- Conversation restoration and memory management components.
-- Background chat worker for model requests.
-- Initial experimental voice-recognition foundation:
-  - `sherpa-onnx` speaker embedding dependency.
-  - Titanet speaker embedding model loaded successfully.
-  - 192-dimensional speaker embeddings.
-  - Microphone capture tested with `sounddevice` at 16 kHz on Apple Silicon macOS.
+- Replaced the Tuna mascot presentation with an original female genie character in pixel art.
+- Added animation frames, expression sprites, a sprite atlas, pixel-art lamp and glow assets.
+- Added EMERGING and RETURNING behavioural states.
+- Added local Sherpa-ONNX wake-word worker and Gennie keyword setup script.
+- Rebranded the desktop UI, personality prompt, Python package metadata and documentation.
+- Added `GENNIE_*` configuration while retaining `TUNA_*` fallbacks.
+- Kept existing PostgreSQL table names and stored data intact.
 
-### Changed
-- Updated the default tested local model to `qwen3:4b-instruct-2507-q4_K_M`.
-- Refined Tuna's personality prompt to favour concise, calm, natural and resourceful responses.
+## Compatibility
 
-### In progress
-- Voice enrollment and speaker verification.
-- Voice interaction integration with the desktop interface.
-
-### Not included in this release
-- Complete speech-to-text and text-to-speech pipeline.
-- Wake-word detection.
-- Cross-device memory synchronisation.
-- A validated distributable macOS application wrapper.
+`TunaBrain` remains an import alias for `GennieBrain`. Existing memory tables, `.env`, model files and local speaker profile are not removed.

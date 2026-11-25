@@ -3,17 +3,19 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tuna-companion"
-version = "0.4.0"
-description = "Tuna — a local-first desktop AI companion prototype"
+name = "project-gennie"
+version = "1.1.1"
+description = "Project Gennie — a local-first desktop AI companion with streaming voice chat"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "PySide6>=6.8,<7",
     "psycopg[binary]>=3.3,<4",
+    "python-dotenv>=1.0,<2",
 ]
 
 [project.optional-dependencies]
+voice = ["sherpa-onnx>=2.0", "sounddevice>=0.5", "numpy>=2.0"]
 dev = ["pytest>=8.0"]
 
 [tool.setuptools.packages.find]
@@ -21,3 +23,6 @@ include = ["app*"]
 
 [tool.setuptools.package-data]
 "app.brain" = ["prompts/*.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

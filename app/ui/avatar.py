@@ -1,138 +1,177 @@
-"""Animated pixel-art avatar for Tuna's desktop body."""
+"""Pixel-art Gennie avatar with a tiny, curious dormant companion mode."""
 
 from __future__ import annotations
 
 import math
+import random
 import time
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, QRectF
-from PySide6.QtGui import QPainter, QPixmap
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QWidget
 
 
 class AvatarWidget(QWidget):
-    """Draws Tuna's expression and adds subtle state-aware motion.
+    """A small wandering genie while dormant; full-size Gennie when summoned."""
 
-    Core state names are translated into visual expressions here. The state
-    machine itself stays independent of Qt and image assets.
-    """
-
-    EXPRESSION_BY_STATE = {
-        "BOOTING": "happy",
-        "IDLE": "idle",
-        "LISTENING": "listening",
-        "THINKING": "thinking",
-        "SPEAKING": "speaking",
-        "SLEEPING": "sleeping",
-        "ERROR": "confused",
+    FRAME_SEQUENCES = {
+        "IDLE": (0, 0, 0, 0, 1, 0, 0, 2),
+        "LISTENING": (4, 4, 5, 4, 6, 4),
+        "THINKING": (7, 7, 9, 7, 9, 7),
+        "SPEAKING": (5, 6, 10, 11, 10, 6),
     }
 
-    def __init__(self, size: int = 176, parent=None) -> None:
+    def __init__(self, size: int = 238, parent=None) -> None:
         super().__init__(parent)
-        self.setObjectName("avatar")
+        self.setObjectName("gennieAvatar")
         self.setFixedSize(size, size)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-
-        project_root = Path(__file__).resolve().parents[2]
-        self.asset_dir = project_root / "assets" / "expressions"
-        self._pixmaps = {
-            name: QPixmap(str(self.asset_dir / f"{name}.png"))
-            for name in set(self.EXPRESSION_BY_STATE.values()) | {"blink"}
-        }
-
-        self._state = "IDLE"
-        self._expression = "idle"
-        self._started_at = time.monotonic()
-        self._next_blink_at = self._started_at + 4.8
-        self._blink_until = 0.0
-
-        # A lightweight timer drives drawing only; it does not run background
-        # work or block the Qt event loop.
-        self._motion_timer = QTimer(self)
-        self._motion_timer.setTimerType(Qt.TimerType.PreciseTimer)
-        self._motion_timer.setInterval(33)  # approximately 30 visual frames/sec
-        self._motion_timer.timeout.connect(self._animate)
-        self._motion_timer.start()
+        root = Path(__file__).resolve().parents[2]
+        self.asset_dir = root / "assets" / "gennie"
+        self.frames = [QPixmap(str(self.asset_dir / "frames" / f"frame_{i:02d}.png")) for i in range(16)]
+        self.dormant_frames = [QPixmap(str(self.asset_dir / "dormant" / f"dormant_{i:02d}.png")) for i in range(12)]
+        self.lamp = QPixmap(str(self.asset_dir / "lamp_idle.png"))
+        self.lamp_glow = QPixmap(str(self.asset_dir / "lamp_glow.png"))
+        self._state = "SLEEPING"
+        self._started = time.monotonic()
+        self._expression_frame: int | None = None
+        self._dormant_frame = 0
+        self._next_dormant_change = self._started + 2.6
+        self._timer = QTimer(self)
+        self._timer.setInterval(80)
+        self._timer.timeout.connect(self._tick)
+        self._timer.start()
 
     @property
     def current_state(self) -> str:
         return self._state
 
-    def set_state(self, state: str) -> None:
-        """Update the avatar only when Tuna's behavioural state changes."""
-        expression = self.EXPRESSION_BY_STATE.get(state, "confused")
-        if state == self._state and expression == self._expression:
-            return
+    def set_avatar_size(self, size: int) -> None:
+        self.setFixedSize(size, size)
+        self.update()
 
+    def set_state(self, state: str) -> None:
+        if state == self._state:
+            return
         self._state = state
-        self._expression = expression
-        now = time.monotonic()
-        self._blink_until = 0.0
-        self._next_blink_at = now + 4.8
+        self._started = time.monotonic()
+        self._expression_frame = None
+        if state in {"BOOTING", "SLEEPING"}:
+            self._dormant_frame = 0
+            self._next_dormant_change = self._started + 2.6
         self.update()
 
     def set_expression(self, expression: str) -> None:
-        """Set a visual expression directly (useful for future emotion events)."""
-        if expression not in self._pixmaps:
-            expression = "confused"
-        self._expression = expression
+        mapping = {"neutral": 0, "happy": 5, "thinking": 9, "listening": 4, "laughing": 3, "explaining": 10, "confident": 15}
+        self._expression_frame = mapping.get(expression, 0)
         self.update()
 
-    def _animate(self) -> None:
+    def _tick(self) -> None:
         now = time.monotonic()
-        if self._state == "IDLE":
-            if self._blink_until and now >= self._blink_until:
-                self._blink_until = 0.0
-            if not self._blink_until and now >= self._next_blink_at:
-                self._blink_until = now + 0.15
-                self._next_blink_at = now + 4.8
+        if self._state in {"BOOTING", "SLEEPING"} and now >= self._next_dormant_change:
+            # Hold each tiny pose long enough to feel like a creature, not a GIF.
+            self._dormant_frame = random.choices(
+                population=(3, 4, 5, 6, 7, 8, 9, 10, 11, 1, 2),
+                weights=(14, 12, 10, 10, 10, 10, 8, 8, 8, 5, 5),
+                k=1,
+            )[0]
+            self._next_dormant_change = now + random.uniform(2.2, 5.8)
         self.update()
 
-    def _pose(self, elapsed: float) -> tuple[float, float, float]:
-        """Return vertical offset, scale and rotation for the active state."""
-        if self._state == "IDLE":
-            return 3.0 * math.sin(elapsed * 2.0), 1.0 + 0.012 * math.sin(elapsed * 1.5), 0.0
-        if self._state == "LISTENING":
-            return 1.2 * math.sin(elapsed * 2.8), 1.0 + 0.014 * math.sin(elapsed * 2.0), 0.0
-        if self._state == "THINKING":
-            return 1.5 * math.sin(elapsed * 1.7), 1.0, 2.0 * math.sin(elapsed * 1.35)
-        if self._state == "SPEAKING":
-            return 1.0 * math.sin(elapsed * 14.0), 1.0 + 0.012 * math.sin(elapsed * 14.0), 0.0
-        if self._state == "SLEEPING":
-            return 1.4 * math.sin(elapsed * 0.8), 1.0, 0.0
-        if self._state == "ERROR":
-            return 0.0, 1.0, 1.2 * math.sin(elapsed * 2.6)
-        # A little buoyancy for the brief BOOTING/HAPPY pose.
-        return 2.0 * math.sin(elapsed * 2.4), 1.0 + 0.014 * math.sin(elapsed * 2.4), 0.0
-
-    def _active_pixmap(self, elapsed: float) -> QPixmap:
-        if self._state == "IDLE" and time.monotonic() < self._blink_until:
-            return self._pixmaps.get("blink", QPixmap())
-
-        # Alternate between the closed smile and open-mouth sprite while
-        # speaking. This creates a simple two-frame talking animation.
-        if self._state == "SPEAKING":
-            frame = "speaking" if int(elapsed / 0.19) % 2 == 0 else "idle"
-            return self._pixmaps.get(frame, QPixmap())
-
-        return self._pixmaps.get(self._expression, QPixmap())
-
-    def paintEvent(self, event) -> None:  # noqa: N802 - Qt override name
-        elapsed = time.monotonic() - self._started_at
-        vertical_offset, scale, rotation = self._pose(elapsed)
-        pixmap = self._active_pixmap(elapsed)
+    def _draw_lamp(self, painter: QPainter, glow: bool = False) -> None:
+        pixmap = self.lamp_glow if glow else self.lamp
         if pixmap.isNull():
             return
+        pulse = 0.82 + 0.15 * math.sin((time.monotonic() - self._started) * 2.2) if glow else 1.0
+        painter.setOpacity(pulse)
+        w = self.width() * 0.82
+        h = w * pixmap.height() / max(1, pixmap.width())
+        target = QRectF((self.width()-w)/2, self.height()-h-10, w, h)
+        painter.drawPixmap(target, pixmap, QRectF(pixmap.rect()))
+        painter.setOpacity(1.0)
 
+    def _draw_smoke(self, painter: QPainter, progress: float) -> None:
+        t = time.monotonic() - self._started
+        painter.setPen(Qt.PenStyle.NoPen)
+        for index in range(7):
+            phase = t * 2.4 + index * 0.86
+            x = self.width()/2 + math.sin(phase) * (18 + index*2)
+            y = self.height() * 0.70 - progress * 66 - index * 8 + math.cos(phase) * 4
+            size = 4 + (index % 3) * 2
+            alpha = max(0, int(150 * progress * (1 - index/10)))
+            painter.setBrush(QColor(154, 100, 255, alpha))
+            painter.drawRect(int(x), int(y), size, size)
+            painter.setBrush(QColor(75, 174, 255, alpha//2))
+            painter.drawRect(int(x+4), int(y+3), max(2,size//2), max(2,size//2))
+
+    def _draw_genie(self, painter: QPainter, frame_index: int, y_offset: float = 0.0, opacity: float = 1.0, scale: float = 1.0) -> None:
+        if not self.frames:
+            return
+        pixmap = self.frames[frame_index % len(self.frames)]
+        if pixmap.isNull():
+            return
+        max_w = self.width() * 1.04 * scale
+        max_h = self.height() * 1.04 * scale
+        ratio = min(max_w / pixmap.width(), max_h / pixmap.height())
+        w, h = pixmap.width()*ratio, pixmap.height()*ratio
+        target = QRectF((self.width()-w)/2, (self.height()-h)/2 + y_offset, w, h)
+        painter.setOpacity(max(0.0, min(1.0, opacity)))
+        painter.drawPixmap(target, pixmap, QRectF(pixmap.rect()))
+        painter.setOpacity(1.0)
+
+    def _draw_dormant_sprite(self, painter: QPainter, elapsed: float) -> None:
+        if not self.dormant_frames:
+            self._draw_lamp(painter, glow=True)
+            return
+        # The first three frames show her sneaking out. Once free, she uses
+        # small, distinct curious/hovering poses with long natural pauses.
+        if elapsed < 2.6:
+            frame = min(2, int(elapsed / 0.87))
+        else:
+            frame = self._dormant_frame
+        pixmap = self.dormant_frames[frame]
+        if pixmap.isNull():
+            return
+        bob = math.sin(elapsed * 1.25) * 1.8
+        target_w = self.width() * 0.76
+        target_h = target_w * pixmap.height() / max(1, pixmap.width())
+        target = QRectF((self.width()-target_w)/2, (self.height()-target_h)/2 + bob, target_w, target_h)
+        painter.drawPixmap(target, pixmap, QRectF(pixmap.rect()))
+
+    def paintEvent(self, event) -> None:  # noqa: N802
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, False)
-        painter.translate(self.width() / 2.0, self.height() / 2.0 + vertical_offset)
-        painter.rotate(rotation)
-        painter.scale(scale, scale)
+        elapsed = time.monotonic() - self._started
 
-        draw_size = min(self.width(), self.height()) * 0.94
-        target = QRectF(-draw_size / 2.0, -draw_size / 2.0, draw_size, draw_size)
-        source = QRectF(pixmap.rect())
-        painter.drawPixmap(target, pixmap, source)
+        if self._state in {"BOOTING", "SLEEPING"}:
+            self._draw_dormant_sprite(painter, elapsed)
+            painter.end()
+            return
+
+        if self._state == "EMERGING":
+            progress = min(1.0, elapsed / 1.25)
+            self._draw_lamp(painter, glow=True)
+            self._draw_smoke(painter, progress)
+            emergence_frames = (12, 13, 14, 15)
+            frame = emergence_frames[min(len(emergence_frames) - 1, int(progress * len(emergence_frames)))]
+            self._draw_genie(painter, frame, y_offset=54*(1-progress), opacity=progress, scale=0.82+0.18*progress)
+            painter.end()
+            return
+
+        if self._state == "RETURNING":
+            progress = min(1.0, elapsed / 1.15)
+            self._draw_lamp(painter, glow=True)
+            self._draw_smoke(painter, 1.0-progress)
+            return_frames = (15, 14, 13, 12)
+            frame = return_frames[min(len(return_frames) - 1, int(progress * len(return_frames)))]
+            self._draw_genie(painter, frame, y_offset=progress*64, opacity=1.0-progress, scale=1.0-0.18*progress)
+            painter.end()
+            return
+
+        sequence = self.FRAME_SEQUENCES.get(self._state, (0,))
+        frame = self._expression_frame if self._expression_frame is not None else sequence[int(elapsed * (3.2 if self._state == "IDLE" else 5.5)) % len(sequence)]
+        bob = math.sin(elapsed * 1.8) * 2.8 if self._state in {"IDLE", "LISTENING"} else math.sin(elapsed * 6.0) * 1.6
+        self._draw_genie(painter, frame, y_offset=bob)
         painter.end()

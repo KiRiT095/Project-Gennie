@@ -1,4 +1,4 @@
-"""Provider contract used by Tuna's brain."""
+"""Provider contract used by Gennie's reasoning layer."""
 
 from __future__ import annotations
 

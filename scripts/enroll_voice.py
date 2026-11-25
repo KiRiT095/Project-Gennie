@@ -3,27 +3,27 @@ import os
 import time
 from pathlib import Path
 
+from app.voice.audio_devices import select_input_device
+
 import numpy as np
 import sounddevice as sd
 import sherpa_onnx
 
 # Configuration
-DEVICE = 3
+DEVICE = None
 SAMPLE_RATE = 16000
 DURATION = 6
 MODEL = Path("models/speaker/nemo_en_titanet_small.onnx")
 
-PROFILE_DIR = (
-    Path.home()
-    / "Library"
-    / "Application Support"
-    / "Tuna"
-    / "voice"
-)
+SUPPORT_DIR = Path.home() / "Library" / "Application Support"
+LEGACY_PROFILE_DIR = SUPPORT_DIR / "Tuna" / "voice"
+GENNIE_PROFILE_DIR = SUPPORT_DIR / "Gennie" / "voice"
+# Reuse the existing enrolled profile in-place; do not move or overwrite it.
+PROFILE_DIR = LEGACY_PROFILE_DIR if (LEGACY_PROFILE_DIR / "profile.json").exists() else GENNIE_PROFILE_DIR
 PROFILE_FILE = PROFILE_DIR / "profile.json"
 
 SENTENCES = [
-    "Hello Tuna. This is my voice, and I am enrolling it.",
+    "Hello Gennie. This is my voice, and I am enrolling it.",
     "I want you to recognise me whenever I speak to you.",
     "A good solution is usually simple, reliable, and practical.",
     "Let's see how well you can recognise my voice.",
@@ -64,7 +64,7 @@ def main():
 
     embeddings = []
 
-    print("\nTuna voice enrollment")
+    print("\nGennie voice enrollment")
     print("====================")
     print("Use your MacBook Air microphone.")
     print("Speak naturally. Avoid music and background noise.")
@@ -76,12 +76,13 @@ def main():
             input("Press Enter when ready...")
 
             print("Recording...")
+            device = select_input_device(sd, os.getenv("GENNIE_MIC_DEVICE", ""))
             audio = sd.rec(
                 int(DURATION * SAMPLE_RATE),
                 samplerate=SAMPLE_RATE,
                 channels=1,
                 dtype="float32",
-                device=DEVICE,
+                device=device,
             )
             sd.wait()
             audio = audio.flatten()

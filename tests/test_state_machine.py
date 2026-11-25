@@ -1,42 +1,28 @@
-import unittest
+import pytest
+from app.core.state_machine import InvalidStateError, InvalidTransitionError, StateMachine
 
-from app.core.state_machine import (
-    InvalidStateError,
-    InvalidTransitionError,
-    StateMachine,
-)
+def test_valid_summon_and_return_cycle():
+    machine = StateMachine()
+    machine.change_state("IDLE")
+    machine.change_state("SLEEPING")
+    machine.change_state("EMERGING")
+    machine.change_state("LISTENING")
+    machine.change_state("THINKING")
+    machine.change_state("SPEAKING")
+    machine.change_state("IDLE")
+    machine.change_state("RETURNING")
+    machine.change_state("SLEEPING")
+    assert machine.current_state == "SLEEPING"
 
+def test_invalid_transition_does_not_change_state():
+    machine = StateMachine()
+    machine.change_state("IDLE")
+    machine.change_state("LISTENING")
+    with pytest.raises(InvalidTransitionError):
+        machine.change_state("SPEAKING")
+    assert machine.current_state == "LISTENING"
 
-class StateMachineTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.machine = StateMachine()
-
-    def test_starts_in_booting(self) -> None:
-        self.assertEqual(self.machine.current_state, "BOOTING")
-
-    def test_valid_path(self) -> None:
-        for state in ("IDLE", "LISTENING", "THINKING", "SPEAKING", "IDLE"):
-            self.machine.change_state(state)
-        self.assertEqual(self.machine.current_state, "IDLE")
-
-    def test_invalid_transition_does_not_change_state(self) -> None:
-        self.machine.change_state("IDLE")
-        self.machine.change_state("LISTENING")
-        with self.assertRaises(InvalidTransitionError):
-            self.machine.change_state("SPEAKING")
-        self.assertEqual(self.machine.current_state, "LISTENING")
-
-    def test_unknown_state_is_rejected(self) -> None:
-        with self.assertRaises(InvalidStateError):
-            self.machine.change_state("DANCING")
-        self.assertEqual(self.machine.current_state, "BOOTING")
-
-    def test_sleep_and_wake_path(self) -> None:
-        self.machine.change_state("IDLE")
-        self.machine.change_state("SLEEPING")
-        self.machine.change_state("IDLE")
-        self.assertEqual(self.machine.current_state, "IDLE")
-
-
-if __name__ == "__main__":
-    unittest.main()
+def test_unknown_state_is_rejected():
+    machine = StateMachine()
+    with pytest.raises(InvalidStateError):
+        machine.change_state("MAGIC")

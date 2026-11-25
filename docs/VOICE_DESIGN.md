@@ -1,32 +1,29 @@
 # Voice interaction design
 
-Voice is the intended primary interaction method, but this UI prototype does not yet access the microphone.
+## Ownership of the microphone
 
-## Intended interaction
+The wake-word and speech-recognition workers must never own the microphone at the same time.
 
-1. A local wake-word service detects the configured wake phrase.
-2. Tuna opens or comes to the foreground and enters `LISTENING`.
-3. Local speech-to-text produces a transcript shown below the avatar.
-4. The brain processes the request.
-5. Text-to-speech speaks the response while the response subtitle appears in Tuna's window.
-6. Tuna returns to `IDLE`.
+- `WakeWordWorker` performs local keyword spotting while Gennie is in `SLEEPING`.
+- On a match, it exits its input-stream context immediately. Its `finished` signal confirms the audio stream has been released.
+- `SpeechRecognitionWorker` opens the same input device only after the wake worker has ended.
+- The ASR worker emits partial text updates, then a final transcript when endpoint detection fires or the user presses Stop.
+- After the response has been spoken and Gennie returns to `SLEEPING`, the wake worker is restarted.
 
-## Privacy and control requirements before always-on listening
+The microphone button follows the same ownership rule: it first interrupts the wake listener, then starts streaming recognition. The button changes to Stop while a capture is active.
 
-- Ask for macOS microphone permission through the normal system prompt.
-- Provide a visible microphone/listening indicator.
-- Provide clear pause/mute and disable-wake-word controls.
-- Prefer on-device wake-word detection and transcription where practical.
-- Do not record or retain raw audio by default.
-- Do not send audio to a network service unless the user explicitly selects that provider.
-- Make microphone startup and shutdown part of a managed service lifecycle.
+## Speech recognition
 
-## Implementation order
+The app uses Sherpa-ONNX `OnlineRecognizer.from_transducer` with the int8 streaming Zipformer English model. It processes small 200 ms audio blocks and emits interim hypotheses as text changes. The model files are downloaded by `scripts/setup_asr_model.sh` and kept in `models/asr/`, which is excluded from Git.
 
-1. Add a `VoiceService` interface with lifecycle methods and typed events.
-2. Add push-to-talk recording as the first testable audio interaction.
-3. Add local speech-to-text and connect transcript events to `show_user_transcription()`.
-4. Add text-to-speech and connect subtitle events to `show_assistant_subtitle()`.
-5. Add configurable local wake-word detection last, with explicit opt-in and pause controls.
+The model is English-only. It can make mistakes, especially with noise, distant microphones, or accents not well represented by its training data. The visible interim transcript is intentionally editable before the final turn is sent.
 
-Do not treat the display hooks as evidence that voice is already implemented.
+## Speech output
+
+On macOS, `SpeechOutputWorker` invokes the built-in `say` utility in a background thread. It prefers an installed English voice from the Ava/Samantha/Allison/Victoria family, but respects `GENNIE_TTS_VOICE` when that exact voice is installed. `GENNIE_TTS_RATE` controls pace. No voice audio is sent to a cloud service.
+
+The installed voice catalogue differs by macOS release and downloaded voice packs; use `scripts/list_macos_voices.py` to inspect the local choices.
+
+## Safety and privacy
+
+Wake-word activation is not speaker authentication. A separate voice-verification step would be needed before using voice as an authorization factor for sensitive actions. The current voice flow is intended for conversational interaction, not account security.

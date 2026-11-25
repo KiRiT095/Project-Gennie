@@ -22,7 +22,7 @@ class ConversationTests(unittest.TestCase):
     def test_prompt_includes_personality_first(self):
         conversation = Conversation("test-id")
         conversation.add("user", "hello")
-        self.assertEqual(conversation.prompt_messages("be Tuna")[0], {"role": "system", "content": "be Tuna"})
+        self.assertEqual(conversation.prompt_messages("be Gennie")[0], {"role": "system", "content": "be Gennie"})
 
 
 if __name__ == "__main__":

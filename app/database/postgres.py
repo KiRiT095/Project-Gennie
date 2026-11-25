@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS tuna_memories_search_idx
 
 class PostgresStore:
     def __init__(self, dsn: str | None = None, connect_timeout: int = 2) -> None:
-        self.dsn = dsn or os.getenv("TUNA_DATABASE_URL", "postgresql:///tuna")
+        self.dsn = dsn or os.getenv("GENNIE_DATABASE_URL") or os.getenv("TUNA_DATABASE_URL", "postgresql:///tuna")
         self.connect_timeout = connect_timeout
         self.available = False
         self.last_error = "PostgreSQL has not been checked yet."
@@ -67,7 +67,7 @@ class PostgresStore:
             # Never echo the connection URL: it may contain a password.
             raise DatabaseUnavailable(
                 "PostgreSQL connection failed. Check that the server is running "
-                "and TUNA_DATABASE_URL points to the Tuna database."
+                "and GENNIE_DATABASE_URL (or the legacy TUNA_DATABASE_URL) points to the existing database."
             ) from exc
 
     def initialize(self) -> bool:
@@ -224,7 +224,7 @@ class PostgresStore:
                     (memory_key, category, content, importance, confidence, source),
                 )
         except Exception as exc:
-            self.mark_unavailable("Could not write to the Tuna memory database.")
+            self.mark_unavailable("Could not write to the Gennie memory database.")
             raise DatabaseUnavailable(self.last_error) from exc
 
     def list_memories(self, limit: int = 30) -> list[dict[str, Any]]:
@@ -238,7 +238,7 @@ class PostgresStore:
                     (limit,),
                 ).fetchall()
         except Exception as exc:
-            self.mark_unavailable("Could not read from the Tuna memory database.")
+            self.mark_unavailable("Could not read from the Gennie memory database.")
             raise DatabaseUnavailable(self.last_error) from exc
         return [
             {"id": row[0], "category": row[1], "content": row[2],
@@ -257,5 +257,5 @@ class PostgresStore:
                 )
                 return cursor.rowcount
         except Exception as exc:
-            self.mark_unavailable("Could not delete from the Tuna memory database.")
+            self.mark_unavailable("Could not delete from the Gennie memory database.")
             raise DatabaseUnavailable(self.last_error) from exc

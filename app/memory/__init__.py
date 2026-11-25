@@ -1,1 +1,1 @@
-"""Selective long-term memory for Tuna."""
+"""Selective long-term memory for Gennie."""

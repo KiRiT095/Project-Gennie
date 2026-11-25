@@ -15,7 +15,7 @@ class MemoryManager:
     def __init__(self, store: PostgresStore, provider: ChatProvider) -> None:
         self.store = store
         self.extractor = MemoryExtractor(provider)
-        self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="tuna-memory")
+        self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="gennie-memory")
         self._pending: set[Future] = set()
 
     def schedule_extraction(self, user_message: str) -> None:

@@ -10,7 +10,7 @@ from typing import Any
 from app.brain.providers.base import ChatProvider
 
 
-EXTRACTION_SYSTEM = """You are Tuna's memory curator. Analyse ONLY the user's supplied message.
+EXTRACTION_SYSTEM = """You are Gennie's memory curator. Analyse ONLY the user's supplied message.
 Return JSON with exactly this shape: {\"decision\":\"save\" or \"ignore\", \"memories\":[{\"key\":string,\"category\":\"core\"|\"long_term\"|\"project\"|\"episodic\",\"content\":string,\"importance\":1-5,\"confidence\":0-1}]}.
 Save only durable, useful facts about the user, their preferences, ongoing projects, explicit decisions, or lessons that will help future conversations. Ignore greetings, jokes, hypotheticals, one-off questions, temporary details and facts merely suggested by the assistant. Never infer facts. Do not save passwords, API keys, tokens, private keys, payment credentials, or highly sensitive personal information. Prefer updating a stable key when the new fact corrects an older one. Keep each memory concise, self-contained and factual. If nothing qualifies, return decision=ignore and an empty memories array.
 """

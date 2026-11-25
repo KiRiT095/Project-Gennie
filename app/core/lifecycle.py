@@ -1,4 +1,4 @@
-"""Coordinates Tuna's high-level startup lifecycle."""
+"""Coordinates Gennie's high-level startup lifecycle."""
 
 from app.core.state_machine import StateMachine
 

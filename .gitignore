@@ -35,3 +35,10 @@ __pycache__/
 
 # macOS
 .DS_Store
+*.onnx
+*.pcm
+
+.gennie-migration-backups/
+
+# Temporary environment backups are stored outside the repository.
+.env.gennie-backup.*

@@ -1,31 +1,8 @@
 # Roadmap
 
-## Genesis — Core
-- [x] State machine with validated transitions
-- [x] Startup lifecycle
-- [x] Unit tests for core state transitions
-
-## Companion UI
-- [x] Compact character-first window
-- [x] Expanded conversation/history view
-- [x] Hide text input in compact mode
-- [x] State-driven pixel-art expressions
-- [x] Temporary subtitle and transcription display hooks
-- [x] Remove always-visible state label and instruction prompts
-- [x] Hide empty dialogue bubbles
-- [x] Add idle bob/blink and state-aware motion
-- [ ] Verify sizing, animation feel, and drag behaviour on the user's Mac
-
-## Voice — next major milestone
-- [ ] Voice service interface and lifecycle
-- [ ] Microphone permission and visible listening indicator
-- [ ] Push-to-talk prototype
-- [ ] Local speech-to-text
-- [ ] Local text-to-speech
-- [ ] Wake-word detection (explicit opt-in, mute/disable controls)
-
-## Brain and memory
-- [ ] Design replaceable brain/provider interface
-- [ ] Connect a local model after interface design
-- [ ] Design persistent memory schema and portability strategy
-- [ ] Permissioned capability system; no arbitrary model shell access
+1. Calibrate the local wake-word threshold on the target Mac and microphone.
+2. Integrate the enrolled speaker embedding as a probabilistic voice check, with a safe manual fallback.
+3. Add a local TTS model option for a consistent voice across macOS versions.
+4. Improve punctuation and language coverage for streaming speech recognition.
+5. Add permissioned, allowlisted desktop tools.
+6. Package a signed macOS application and later add a separate iOS body.

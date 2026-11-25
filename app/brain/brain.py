@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 from app.brain.conversation import Conversation
 from app.brain.providers.base import ChatProvider
 from app.database.postgres import PostgresStore
 
 
-class TunaBrain:
+class GennieBrain:
     def __init__(
         self,
         provider: ChatProvider,
@@ -58,6 +59,18 @@ class TunaBrain:
         except Exception:
             # Keep the in-memory transcript intact so a retry retains context.
             raise
+        # Enforce the requested no-emoji voice/style even if the local model
+        # ignores the system instruction. Keep stored history consistent with
+        # what the UI and TTS actually deliver.
+        reply = re.sub(
+            r"[\U0001F1E6-\U0001F1FF\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F\u200D]",
+            "",
+            reply,
+        )
+        reply = re.sub(r"[ \t]{2,}", " ", reply)
+        reply = re.sub(r"\s+([.,!?;:])", r"\1", reply).strip()
+        if not reply:
+            reply = "I'm here. What would you like to talk about?"
         self.conversation.add("assistant", reply)
 
         if self.store.available:
@@ -70,3 +83,7 @@ class TunaBrain:
                 # the current chat remains usable for this session.
                 self.store.mark_unavailable("Could not save this conversation to PostgreSQL.")
         return reply
+
+
+# Backwards-compatible import alias for existing scripts and tests.
+TunaBrain = GennieBrain

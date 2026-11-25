@@ -1,35 +1,36 @@
-# Architecture
-
-## Current desktop shape
+# Project Gennie Architecture
 
 ```text
-main.py
-  └── DesktopBody
-       ├── QApplication / Qt event loop
-       ├── Lifecycle
-       │    └── StateMachine
-       └── MainWindow
-            ├── AvatarWidget
-            │    └── expression PNG assets + timer-driven motion
-            ├── temporary transcript/caption labels
-            └── expanded-only history and text input
+Desktop UI (PySide6)
+  ├─ Pixel-art lamp/genie avatar and rounded conversation window
+  ├─ Live transcript input and manual microphone button
+  ├─ WakeWordWorker (one-shot background QThread)
+  │    └─ Microphone → Sherpa-ONNX KeywordSpotter → wake event → release mic
+  ├─ SpeechRecognitionWorker (background QThread)
+  │    └─ Microphone → Sherpa-ONNX OnlineRecognizer → interim/final text
+  └─ SpeechOutputWorker (background QThread)
+       └─ macOS say → preferred installed English voice
+
+GennieBrain → ChatProvider → local Ollama
+      └─ Conversation → PostgreSQL store → MemoryManager
 ```
 
-`StateMachine` is framework-independent. It validates behavioural state transitions. `Lifecycle` coordinates startup. `DesktopBody` composes the desktop application. `MainWindow` decides what is visible and collects text input. `AvatarWidget` translates the current state into a visual expression and subtle motion.
+## Microphone handoff
 
-## Compact and expanded presentation
+Only one worker may own the microphone at a time. On a wake match, `WakeWordWorker` breaks out of its input-stream context and exits. The UI waits for the worker to finish before creating `SpeechRecognitionWorker`. The recognizer emits interim hypotheses to the input field, then a final transcript after endpoint detection or a manual stop. When the reply finishes and Gennie returns to the lamp, the wake listener is armed again.
 
-Compact mode contains only Tuna's character, except when a temporary speech transcript or assistant subtitle has content. There is no permanent state label or instruction prompt. Clicking the character opens the conversation view. Expanded mode shows the header, conversation history, text input, and the same character at the top. Escape or the Compact control returns to compact mode.
+The manual microphone button uses the same handoff: it requests interruption of the wake worker, waits for its `finished` signal, and only then starts streaming ASR.
 
-## Animation approach
+## Speech output
 
-The avatar uses the expression PNGs as sprite frames. A small Qt timer triggers repainting at about 30 frames per second. The paint method computes a subtle pose from elapsed time: idle floating, listening pulse, thinking tilt, and a speaking open/closed-mouth cycle. Idle blinking temporarily displays the blink sprite. This is code-driven animation; there is no video or animated GIF playback.
+`SpeechOutputWorker` calls macOS `say` outside the Qt UI thread. It prefers Ava when installed, then Samantha and other English voices, and supports `GENNIE_TTS_VOICE` and `GENNIE_TTS_RATE`. No remote speech service is included.
 
-## Boundaries
+## AI and memory
 
-- Core must not import PySide6.
-- UI must not own a duplicate state value.
-- The state label is intentionally not shown; the avatar expresses state.
-- Speech/transcription methods are display hooks, not audio capture or speech recognition.
-- Wake-word listening must be opt-in and should include microphone permission, visible listening state, mute/disable controls, and local processing.
-- Future command execution must use explicit allowlisted capabilities and permission checks, never arbitrary model-generated shell commands.
+`ChatWorker` keeps local Ollama inference off the GUI thread. `GennieBrain` retrieves context from PostgreSQL and saves conversation turns using the existing schema. The assistant output is filtered to remove emoji, and the system prompt strongly prioritizes concise replies.
+
+Persistent database table names remain `tuna_*` to preserve existing user data. The application identity is Project Gennie.
+
+## Model storage
+
+Wake-word and streaming-ASR model weights live in `models/`, which is excluded from Git. `scripts/setup_asr_model.sh` downloads the English streaming ASR model locally. `scripts/configure_gennie_wakeword.sh` creates Gennie's BPE keyword aliases from the locally installed wake-word model.

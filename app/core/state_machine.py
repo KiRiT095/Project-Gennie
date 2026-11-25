@@ -1,4 +1,4 @@
-"""Small, dependency-free state machine for Tuna's lifecycle."""
+"""Validated behavioural states for Project Gennie."""
 
 from typing import Final
 
@@ -12,25 +12,19 @@ class InvalidTransitionError(ValueError):
 
 
 class StateMachine:
-    STATES: Final[frozenset[str]] = frozenset(
-        {
-            "BOOTING",
-            "IDLE",
-            "LISTENING",
-            "THINKING",
-            "SPEAKING",
-            "SLEEPING",
-            "ERROR",
-        }
-    )
-
+    STATES: Final[frozenset[str]] = frozenset({
+        "BOOTING", "IDLE", "EMERGING", "LISTENING", "THINKING",
+        "SPEAKING", "RETURNING", "SLEEPING", "ERROR",
+    })
     TRANSITIONS: Final[dict[str, frozenset[str]]] = {
         "BOOTING": frozenset({"IDLE", "ERROR"}),
-        "IDLE": frozenset({"LISTENING", "SLEEPING", "ERROR"}),
-        "LISTENING": frozenset({"THINKING", "IDLE", "ERROR"}),
+        "IDLE": frozenset({"EMERGING", "LISTENING", "RETURNING", "SLEEPING", "ERROR"}),
+        "EMERGING": frozenset({"LISTENING", "IDLE", "ERROR"}),
+        "LISTENING": frozenset({"THINKING", "IDLE", "RETURNING", "ERROR"}),
         "THINKING": frozenset({"SPEAKING", "IDLE", "ERROR"}),
-        "SPEAKING": frozenset({"IDLE", "ERROR"}),
-        "SLEEPING": frozenset({"IDLE", "ERROR"}),
+        "SPEAKING": frozenset({"IDLE", "RETURNING", "ERROR"}),
+        "RETURNING": frozenset({"SLEEPING", "IDLE", "ERROR"}),
+        "SLEEPING": frozenset({"EMERGING", "IDLE", "ERROR"}),
         "ERROR": frozenset({"BOOTING"}),
     }
 
@@ -50,12 +44,8 @@ class StateMachine:
 
     def change_state(self, next_state: str) -> str:
         self._validate_state_name(next_state)
-
         if next_state not in self.TRANSITIONS[self._current_state]:
-            raise InvalidTransitionError(
-                f"Transition {self._current_state} -> {next_state} is not allowed."
-            )
-
+            raise InvalidTransitionError(f"Transition {self._current_state} -> {next_state} is not allowed.")
         previous_state = self._current_state
         self._current_state = next_state
         return previous_state
@@ -63,4 +53,4 @@ class StateMachine:
     @classmethod
     def _validate_state_name(cls, state: str) -> None:
         if state not in cls.STATES:
-            raise InvalidStateError(f"Unknown Tuna state: {state!r}")
+            raise InvalidStateError(f"Unknown Gennie state: {state!r}")

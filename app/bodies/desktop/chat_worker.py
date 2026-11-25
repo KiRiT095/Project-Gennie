@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from PySide6.QtCore import QThread, Signal
 
-from app.brain.brain import TunaBrain
+from app.brain.brain import GennieBrain
 from app.memory.manager import MemoryManager
 
 
@@ -12,7 +12,7 @@ class ChatWorker(QThread):
     succeeded = Signal(str)
     failed = Signal(str)
 
-    def __init__(self, brain: TunaBrain, memory: MemoryManager, message: str) -> None:
+    def __init__(self, brain: GennieBrain, memory: MemoryManager, message: str) -> None:
         super().__init__()
         self.brain = brain
         self.memory = memory
